@@ -18,6 +18,7 @@ import {
 } from "react-native";
 // import Geolocation from "react-native-geolocation-service";
 import * as Location from "expo-location";
+import { parkingService } from "./services/parkingService";
 
 const minimalMapStyle = [
   {
@@ -51,6 +52,18 @@ const minimalMapStyle = [
 
 export default function App() {
   console.log("Executed!");
+
+  const [parkingSpots, setParkingSpots] = useState([]);
+
+  const getParking = async () => {
+    const res = await parkingService.getParkingSpots();
+    console.log(res);
+    if (res) {
+      setParkingSpots(res);
+    } else {
+      setErrorMsg("Unable to retrieve events from server");
+    }
+  };
 
   const [mapRegion, setmapRegion] = useState({
     latitude: 37.78825,
@@ -111,11 +124,15 @@ export default function App() {
 
   // goToMyLocation();
 
+  useEffect(() => {
+    getParking();
+  }, []);
+
   return (
     <View style={styles.container}>
       <Button
-        onPress={goToMyLocation}
-        title="Learn More"
+        onPress={getParking}
+        title={parkingSpots.length + ""}
         color="#841584"
         accessibilityLabel="Learn more about this purple button"
       />
@@ -168,12 +185,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   map: {
-    width: Dimensions.get("window").width, // * 0.8,
-    height: Dimensions.get("window").height, // * 0.8,
+    width: Dimensions.get("window").width * 0.8,
+    height: Dimensions.get("window").height * 0.8,
   },
   parkingSymbol: {
-    width: 60,
-    height: 60,
+    width: 50,
+    height: 50,
   },
   parkingPreview: {
     width: 120,
