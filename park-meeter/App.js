@@ -20,6 +20,7 @@ import {
 import * as Location from "expo-location";
 import { parkingService } from "./services/parkingService";
 import ParkingSpotList from "./components/ParkingSpotList";
+import TimePickerScreen from "./app/screens/TimePickerScreen";
 
 const minimalMapStyle = [
   {
@@ -133,7 +134,7 @@ export default function App() {
   useEffect(() => {
     getParking();
   }, []);
-
+  return <TimePickerScreen />;
   return (
     <View style={styles.container}>
       <Button
