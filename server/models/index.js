@@ -5,7 +5,7 @@ dotenv.config();
 const db = new Client({
   user: process.env.DB_USER,
   host: "localhost",
-  database: "parkingdb",
+  database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT,
 });

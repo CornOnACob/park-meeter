@@ -19,6 +19,7 @@ import {
 // import Geolocation from "react-native-geolocation-service";
 import * as Location from "expo-location";
 import { parkingService } from "./services/parkingService";
+import ParkingSpotList from "./components/ParkingSpotList";
 
 const minimalMapStyle = [
   {
@@ -56,6 +57,7 @@ export default function App() {
   const [parkingSpots, setParkingSpots] = useState([]);
 
   const getParking = async () => {
+    console.log("Getting parking");
     const res = await parkingService.getParkingSpots();
     console.log(res);
     if (res) {
@@ -63,6 +65,10 @@ export default function App() {
     } else {
       setErrorMsg("Unable to retrieve events from server");
     }
+  };
+
+  const logParking = () => {
+    console.log(parkingSpots[0].image);
   };
 
   const [mapRegion, setmapRegion] = useState({
@@ -131,7 +137,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <Button
-        onPress={getParking}
+        onPress={logParking}
         title={parkingSpots.length + ""}
         color="#841584"
         accessibilityLabel="Learn more about this purple button"
@@ -149,25 +155,40 @@ export default function App() {
         }}
         provider={PROVIDER_GOOGLE}
       >
-        <Marker
-          // title="Title"
-          // description="Desc"
-          coordinate={{ latitude: 45.49074, longitude: -73.8146 }}
-        >
-          <Image
-            style={styles.parkingSymbol}
-            source={require("./assets/parking-symbol.png")}
-          />
-          <Callout>
-            <View>
-              <Text>Parking available</Text>
-              <Image
-                style={styles.parkingPreview}
-                source={require("./assets/driveway1.jpg")}
-              />
-            </View>
-          </Callout>
-        </Marker>
+        {parkingSpots && parkingSpots.length > 0 ? (
+          <ParkingSpotList parkingSpots={parkingSpots} />
+        ) : (
+          // <Marker
+          //   coordinate={{
+          //     latitude: parkingSpots[0].coords.x,
+          //     longitude: parkingSpots[0].coords.y,
+          //   }}
+          // >
+          //   <Image
+          //     style={styles.parkingSymbol}
+          //     source={require("./app/assets/parking-symbol.png")}
+          //   />
+          // </Marker>
+          <Marker
+            // title="Title"
+            // description="Desc"
+            coordinate={{ latitude: 45.49074, longitude: -73.8146 }}
+          >
+            <Image
+              style={styles.parkingSymbol}
+              source={require("./app/assets/parking-symbol.png")}
+            />
+            <Callout>
+              <View>
+                <Text>Parking available</Text>
+                <Image
+                  style={styles.parkingPreview}
+                  source={require("./app/assets/driveway1.jpg")}
+                />
+              </View>
+            </Callout>
+          </Marker>
+        )}
       </MapView>
       <StatusBar style="auto" />
       <View>
@@ -185,8 +206,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   map: {
-    width: Dimensions.get("window").width * 0.8,
-    height: Dimensions.get("window").height * 0.8,
+    width: Dimensions.get("window").width, // * 0.8,
+    height: Dimensions.get("window").height, // * 0.8,
   },
   parkingSymbol: {
     width: 50,
