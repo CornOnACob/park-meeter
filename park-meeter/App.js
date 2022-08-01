@@ -1,92 +1,45 @@
-import React, { useState, useEffect } from "react";
-import { StatusBar } from "expo-status-bar";
-import MapView, {
-  PROVIDER_GOOGLE,
-  Marker,
-  Callout,
-  AnimatedRegion,
-  Animated,
-} from "react-native-maps";
-import {
-  Image,
-  StyleSheet,
-  Button,
-  Text,
-  View,
-  Dimensions,
-  TextInput,
-} from "react-native";
-// import Geolocation from "react-native-geolocation-service";
+import React, { useState, useEffect, useCallback } from "react";
+import { StyleSheet, Text, Button, StatusBar, View } from "react-native";
 import * as Location from "expo-location";
 import { parkingService } from "./services/parkingService";
-import ParkingSpotList from "./components/ParkingSpotList";
+import LoadingScreen from "./app/screens/LoadingScreen";
+import MapScreen from "./app/screens/MapScreen";
 import TimePickerScreen from "./app/screens/TimePickerScreen";
+import PaymentScreen from "./app/screens/PaymentScreen";
+import SuccessScreen from "./app/screens/SuccessScreen";
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { ParkingContext } from './app/contexts/ParkingContext';
 
-const minimalMapStyle = [
-  {
-    featureType: "administrative.land_parcel",
-    elementType: "labels",
-    stylers: [
-      {
-        visibility: "off",
-      },
-    ],
-  },
-  {
-    featureType: "poi",
-    elementType: "labels.text",
-    stylers: [
-      {
-        visibility: "off",
-      },
-    ],
-  },
-  {
-    featureType: "road.local",
-    elementType: "labels",
-    stylers: [
-      {
-        visibility: "off",
-      },
-    ],
-  },
-];
+const Stack = createNativeStackNavigator();
 
 export default function App() {
-  console.log("Executed!");
 
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const [parkingSpots, setParkingSpots] = useState([]);
+  const [selectedParking, setSelectedParking] = useState(null);
+  const [location, setLocation] = useState(null);
 
   const getParking = async () => {
-    console.log("Getting parking");
     const res = await parkingService.getParkingSpots();
-    console.log(res);
-    if (res) {
+    if (res.length > 0) {
       setParkingSpots(res);
+      setIsLoading(false);
     } else {
-      setErrorMsg("Unable to retrieve events from server");
+      setErrorMessage("Unable to fetch parking data from server");
     }
   };
 
-  const logParking = () => {
-    console.log(parkingSpots[0].image);
-  };
-
-  const [mapRegion, setmapRegion] = useState({
-    latitude: 37.78825,
-    longitude: -122.4324,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
-  });
-
-  const [location, setLocation] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
+  useEffect(() => {
+    console.log('useEffect');
+  }, []);
 
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied");
+        //setErrorMsg("Permission to access location was denied");
         return;
       }
 
@@ -95,127 +48,32 @@ export default function App() {
     })();
   }, []);
 
-  let text = "Waiting..";
-  if (errorMsg) {
-    text = errorMsg;
-  } else if (location) {
-    text = JSON.stringify(location);
-  }
-
-  // Geolocation.getCurrentPosition(
-  //   (position) => {
-  //     console.log(position);
-  //   },
-  //   (error) => {
-  //     // See error code charts below.
-  //     console.log(error.code, error.message);
-  //   },
-  //   { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-  // );
-
-  const mapRef = React.createRef();
-
-  const goToMyLocation = async () => {
-    console.log(location.coords.latitude, "lat");
-    console.log(location.coords.longitude, "long");
-    console.log(location, "LOCATION");
-    mapRef.current.animateCamera({
-      center: {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
-      },
-    });
-  };
-
-  // goToMyLocation();
-
   useEffect(() => {
     getParking();
   }, []);
-  return <TimePickerScreen />;
-  return (
-    <View style={styles.container}>
-      <Button
-        onPress={logParking}
-        title={parkingSpots.length + ""}
-        color="#841584"
-        accessibilityLabel="Learn more about this purple button"
-      />
-      <MapView
-        ref={mapRef}
-        loadingEnabled={true}
-        style={styles.map}
-        // customMapStyle={minimalMapStyle}
-        initialRegion={{
-          latitude: 45.55877737048191,
-          longitude: -73.5483988894613,
-          latitudeDelta: 0.05, //0.0922,
-          longitudeDelta: 0.02, //0.0421,
-        }}
-        provider={PROVIDER_GOOGLE}
-      >
-        {parkingSpots && parkingSpots.length > 0 ? (
-          <ParkingSpotList parkingSpots={parkingSpots} />
-        ) : (
-          // <Marker
-          //   coordinate={{
-          //     latitude: parkingSpots[0].coords.x,
-          //     longitude: parkingSpots[0].coords.y,
-          //   }}
-          // >
-          //   <Image
-          //     style={styles.parkingSymbol}
-          //     source={require("./app/assets/parking-symbol.png")}
-          //   />
-          // </Marker>
-          <Marker
-            // title="Title"
-            // description="Desc"
-            coordinate={{ latitude: 45.49074, longitude: -73.8146 }}
-          >
-            <Image
-              style={styles.parkingSymbol}
-              source={require("./app/assets/parking-symbol.png")}
-            />
-            <Callout>
-              <View>
-                <Text>Parking available</Text>
-                <Image
-                  style={styles.parkingPreview}
-                  source={require("./app/assets/driveway1.jpg")}
-                />
-              </View>
-            </Callout>
-          </Marker>
-        )}
-      </MapView>
-      <StatusBar style="auto" />
-      <View>
-        <TextInput />
-      </View>
-    </View>
-  );
-}
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "dodgerblue", //'#fff',
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  map: {
-    width: Dimensions.get("window").width, // * 0.8,
-    height: Dimensions.get("window").height, // * 0.8,
-  },
-  parkingSymbol: {
-    width: 50,
-    height: 50,
-  },
-  parkingPreview: {
-    width: 120,
-    height: 80,
-  },
-});
+  // return (
+  //   <ErrorContext.Provider value={{errorMessage}}>
+  //     <LoadingScreen />
+  //   </ErrorContext.Provider>
+  // )
+
+  return (
+    <NavigationContainer>
+      <StatusBar barStyle = "dark-content" hidden = {false} backgroundColor = "#00BCD4" translucent = {true} />
+      <ParkingContext.Provider value={{selectedParking, setSelectedParking}}>
+        <Stack.Navigator initialRouteName="Loading" screenOptions={{gestureEnabled: false}} >
+          <Stack.Screen name="Loading" options={{ headerShown: false }}>
+            {(props) => <LoadingScreen {...props} errorMessage={errorMessage} isLoading={isLoading} />}
+          </Stack.Screen>
+          <Stack.Screen name="Map" options={{ headerShown: false }}>
+            {(props) => <MapScreen {...props} parkingSpots={parkingSpots} />}
+          </Stack.Screen>
+          <Stack.Screen name="TimePicker" component={TimePickerScreen} options={{ title: 'Pick a Time' /*headerShown: false*/ }} />
+          <Stack.Screen name="Payment" component={PaymentScreen} options={{ title: 'Payment' /*headerShown: false*/ }} />
+          <Stack.Screen name="Success" component={SuccessScreen} options={{ headerShown: false }} />
+        </Stack.Navigator>
+      </ParkingContext.Provider>
+    </NavigationContainer> 
+  )
+}

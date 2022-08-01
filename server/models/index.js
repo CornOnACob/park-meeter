@@ -1,6 +1,5 @@
 const { Client } = require("pg");
-const dotenv = require("dotenv");
-dotenv.config();
+require("dotenv").config();
 
 const db = new Client({
   user: process.env.DB_USER,
