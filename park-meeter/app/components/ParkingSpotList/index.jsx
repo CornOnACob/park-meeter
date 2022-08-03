@@ -1,7 +1,6 @@
 import React from "react";
-import { View, Text, Button } from "react-native";
+import { View } from "react-native";
 import ParkingSpot from "../ParkingSpot";
-// import "./styles.js";
 
 function ParkingSpotList(props) {
   return (

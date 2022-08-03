@@ -1,12 +1,12 @@
-import React, { useState, useContext } from "react";
+import React, { useContext } from "react";
 import { ParkingContext } from "../../contexts/ParkingContext.js";
 import { Marker, Callout } from "react-native-maps";
-import { Image, StyleSheet, View, Text, Button } from "react-native";
-import "./styles.js";
+import { Image, View, Text } from "react-native";
+import { styles } from "./styles.js";
 
 function ParkingSpot(props) {
 
-  const { setSelectedParking } = useContext(ParkingContext);
+  const { selectedParking, setSelectedParking } = useContext(ParkingContext);
 
   let startHours = props.parkingSpot.start_time.substring(0, 2) - 4;
   const startMins = props.parkingSpot.start_time.substring(3, 5);
@@ -31,16 +31,13 @@ function ParkingSpot(props) {
         longitude: props.parkingSpot.coords.y,
       }}
       onPress={() => setSelectedParking(props.parkingSpot)}
-      // onPress={() => console.log('PRESS INSIDE MARKER')}
-      
     >
       <Image
-        style={styles.parkingSymbol}
+        style={selectedParking !== null && props.parkingSpot.id === selectedParking.id ? styles.selected : styles.notSelected}
         source={require("../../assets/parking-symbol.png")}
       />
       <Callout style={styles.parkingCallout} >
         <View style={{ alignSelf: 'flex-start' }}>
-          {/* <Text>Parking available</Text> */}
           <Text style={styles.titleText}>{props.parkingSpot.name}</Text>
           <Text>{props.parkingSpot.description}</Text>
           <Text style={styles.costText}>
@@ -48,8 +45,7 @@ function ParkingSpot(props) {
           </Text>
           <Image
             style={styles.parkingPreview}
-            // source={require("../../app/assets/driveway/" + parkingSpot.image +".jpg")}
-            source={require("../../assets/driveway1.jpg")}
+            source={{uri:`https://parkmeeter.s3.amazonaws.com/driveways/${props.parkingSpot.image}.jpg`}}
           />
           <Text>Available from</Text>
           <Text>{startHours}:{startMins}{startMeridiem} to</Text>
@@ -61,30 +57,5 @@ function ParkingSpot(props) {
   );
   
 }
-
-const styles = StyleSheet.create({
-  parkingSymbol: {
-    width: 50,
-    height: 50,
-  },
-  parkingPreview: {
-    width: 150,
-    height: 100,
-  },
-  titleText: {
-    textAlign: "center",
-    fontSize: 15,
-    fontWeight: "bold",
-  },
-  costText: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  parkingCallout: {
-    //flex: 1,
-    //position: 'relative',
-    width: 200,
-  },
-});
 
 export default ParkingSpot;

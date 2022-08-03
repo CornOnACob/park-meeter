@@ -1,4 +1,4 @@
-import {SERVER_URL} from "@env";
+import { SERVER_URL } from "@env";
 
 function getParkingSpots() {
   return fetch(`${SERVER_URL}/parking`)

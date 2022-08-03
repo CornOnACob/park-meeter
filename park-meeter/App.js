@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { StyleSheet, Text, Button, StatusBar, View } from "react-native";
-import * as Location from "expo-location";
+import React, { useState, useEffect } from "react";
+import { StatusBar } from "react-native";
 import { parkingService } from "./services/parkingService";
 import LoadingScreen from "./app/screens/LoadingScreen";
 import MapScreen from "./app/screens/MapScreen";
@@ -19,7 +18,6 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [parkingSpots, setParkingSpots] = useState([]);
   const [selectedParking, setSelectedParking] = useState(null);
-  const [location, setLocation] = useState(null);
 
   const getParking = async () => {
     const res = await parkingService.getParkingSpots();
@@ -32,31 +30,8 @@ export default function App() {
   };
 
   useEffect(() => {
-    console.log('useEffect');
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        //setErrorMsg("Permission to access location was denied");
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation(location);
-    })();
-  }, []);
-
-  useEffect(() => {
     getParking();
   }, []);
-
-  // return (
-  //   <ErrorContext.Provider value={{errorMessage}}>
-  //     <LoadingScreen />
-  //   </ErrorContext.Provider>
-  // )
 
   return (
     <NavigationContainer>
@@ -69,8 +44,8 @@ export default function App() {
           <Stack.Screen name="Map" options={{ headerShown: false }}>
             {(props) => <MapScreen {...props} parkingSpots={parkingSpots} />}
           </Stack.Screen>
-          <Stack.Screen name="TimePicker" component={TimePickerScreen} options={{ title: 'Pick a Time' /*headerShown: false*/ }} />
-          <Stack.Screen name="Payment" component={PaymentScreen} options={{ title: 'Payment' /*headerShown: false*/ }} />
+          <Stack.Screen name="TimePicker" component={TimePickerScreen} options={{ title: 'Pick a Time' }} />
+          <Stack.Screen name="Payment" component={PaymentScreen} options={{ title: 'Payment' }} />
           <Stack.Screen name="Success" component={SuccessScreen} options={{ headerShown: false }} />
         </Stack.Navigator>
       </ParkingContext.Provider>
